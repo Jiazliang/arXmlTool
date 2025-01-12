@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AUTOSAR xmlns="http://autosar.org/schema/r4.0">
+    <AR-PACKAGES>
+        <AR-PACKAGE>
+            <SHORT-NAME>Container1</SHORT-NAME>
+            <ELEMENTS>
+                <ECUC-CONTAINER-VALUE>
+                    <SHORT-NAME>Config1</SHORT-NAME>
+                    <PARAMETERS>
+                        <ECUC-STRING-PARAM-VALUE>
+                            <VALUE>test</VALUE>
+                        </ECUC-STRING-PARAM-VALUE>
+                    </PARAMETERS>
+                </ECUC-CONTAINER-VALUE>
+            </ELEMENTS>
+        </AR-PACKAGE>
+    </AR-PACKAGES>
+</AUTOSAR>
