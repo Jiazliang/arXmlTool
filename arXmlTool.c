@@ -20,6 +20,7 @@ typedef enum {
     MODE_MERGE,
     MODE_COMPARE,
     MODE_GENERATE,
+    MODE_FORMAT,
     MODE_UNKNOWN
 } OperationMode;
 
@@ -43,6 +44,7 @@ OperationMode parse_mode(const char* mode_str) {
     if (strcmp(mode_str, "merge") == 0) return MODE_MERGE;
     if (strcmp(mode_str, "compare") == 0) return MODE_COMPARE;
     if (strcmp(mode_str, "generate") == 0) return MODE_GENERATE;
+    if (strcmp(mode_str, "format") == 0) return MODE_FORMAT;
     return MODE_UNKNOWN;
 }
 
@@ -53,11 +55,23 @@ void print_usage() {
     printf("Modes:\n");
     printf("  merge    - Merge multiple ARXML files\n");
     printf("  compare  - Compare ARXML files\n");
-    printf("  generate - Generate ARXML file\n\n");
+    printf("  generate - Generate ARXML file\n");
+    printf("  format   - Format ARXML files\n\n");
     printf("Merge mode options:\n");
     printf("  -a <file.arxml>  Specify input file (can be used multiple times)\n");
     printf("  -m <file.arxml>  Specify output file\n");
-    printf("  -o <directory>   Specify output directory\n");
+    printf("  -o <directory>   Specify output directory (optional)\n");
+    printf("  -i <style>       Specify indentation style (optional)\n");
+    printf("                   - 'tab': Use tab for indentation\n");
+    printf("                   - '2': Use 2 spaces for indentation\n");
+    printf("                   - '4': Use 4 spaces for indentation (default)\n\n");
+    printf("Format mode options:\n");
+    printf("  -a <file.arxml>  Specify input file (can be used multiple times)\n");
+    printf("  -o <directory>   Specify output directory (optional, will overwrite source files if not specified)\n");
+    printf("  -i <style>       Specify indentation style (optional)\n");
+    printf("                   - 'tab': Use tab for indentation\n");
+    printf("                   - '2': Use 2 spaces for indentation\n");
+    printf("                   - '4': Use 4 spaces for indentation (default)\n");
 }
 
 int parse_merge_options(int argc, char *argv[], ProgramOptions *opts) {
@@ -423,6 +437,193 @@ static xmlChar* get_short_name(xmlNodePtr node) {
     return NULL;
 }
 
+// 新增format模式的参数解析函数
+int parse_format_options(int argc, char *argv[], ProgramOptions *opts) {
+    int opt;
+    opts->input_file_count = 0;
+    opts->indent_style = INDENT_4SPACE; // 默认使用4空格缩进
+    
+    // Set default output directory to current directory
+    strncpy(opts->output_dir, ".", MAX_PATH - 1);
+    
+    // Reset getopt
+    optind = 0;
+    
+    while ((opt = getopt(argc, argv, "a:o:i:")) != -1) {
+        switch (opt) {
+            case 'a':
+                if (opts->input_file_count >= MAX_FILES) {
+                    printf("Error: Number of input files exceeds limit (%d)\n", MAX_FILES);
+                    return 0;
+                }
+                strncpy(opts->input_files[opts->input_file_count], optarg, MAX_PATH - 1);
+                opts->input_file_count++;
+                break;
+            case 'o':
+                strncpy(opts->output_dir, optarg, MAX_PATH - 1);
+                break;
+            case 'i':
+                if (strcmp(optarg, "tab") == 0) {
+                    opts->indent_style = INDENT_TAB;
+                } else if (strcmp(optarg, "2") == 0) {
+                    opts->indent_style = INDENT_2SPACE;
+                } else if (strcmp(optarg, "4") == 0) {
+                    opts->indent_style = INDENT_4SPACE;
+                } else {
+                    printf("Error: Invalid indent style '%s'. Use 'tab', '2' or '4'\n", optarg);
+                    return 0;
+                }
+                break;
+            case '?':
+                printf("Error: Invalid option or missing argument\n");
+                return 0;
+            default:
+                printf("Error: Unknown option %c\n", opt);
+                return 0;
+        }
+    }
+    
+    // Check required parameters
+    if (opts->input_file_count == 0) {
+        printf("Error: Format mode requires at least one input file (-a)\n");
+        return 0;
+    }
+    
+    // Check if files exist
+    for (int i = 0; i < opts->input_file_count; i++) {
+        FILE* file = fopen(opts->input_files[i], "r");
+        if (!file) {
+            printf("Error: Cannot open input file '%s'\n", opts->input_files[i]);
+            return 0;
+        }
+        fclose(file);
+    }
+    
+    // Check if output directory exists
+    if (strcmp(opts->output_dir, ".") != 0) {
+        #ifdef _WIN32
+        if (_access(opts->output_dir, 0) != 0) {
+            printf("Error: Output directory '%s' does not exist\n", opts->output_dir);
+            return 0;
+        }
+        #else
+        if (access(opts->output_dir, F_OK) != 0) {
+            printf("Error: Output directory '%s' does not exist\n", opts->output_dir);
+            return 0;
+        }
+        #endif
+    }
+    
+    return 1;
+}
+
+// 新增format功能实现函数
+int format_arxml_files(const ProgramOptions *opts) {
+    // 先设置全局格式化参数
+    xmlKeepBlanksDefault(0);
+    xmlIndentTreeOutput = 1;
+    int format_output = 1;
+
+    // 根据选项设置缩进字符串
+    const char* indent_str;
+    switch (opts->indent_style) {
+        case INDENT_TAB:
+            indent_str = "\t";
+            break;
+        case INDENT_2SPACE:
+            indent_str = "  ";
+            break;
+        case INDENT_4SPACE:
+            indent_str = "    ";
+            break;
+        default:
+            indent_str = "    ";
+    }
+
+    for (int i = 0; i < opts->input_file_count; i++) {
+        xmlDocPtr doc = xmlReadFile(opts->input_files[i], NULL, XML_PARSE_NOBLANKS);
+        if (doc == NULL) {
+            printf("Error: Cannot parse file '%s'\n", opts->input_files[i]);
+            return 0;
+        }
+
+        // 确定输出路径
+        const char* output_path;
+        char new_path[MAX_PATH];
+        
+        if (strcmp(opts->output_dir, ".") == 0) {
+            // 如果没有指定输出目录，直接覆盖源文件
+            output_path = opts->input_files[i];
+        } else {
+            // 如果指定了输出目录，构建新的输出路径
+            const char* input_filename = strrchr(opts->input_files[i], '/');
+            if (input_filename == NULL) {
+                input_filename = strrchr(opts->input_files[i], '\\');
+            }
+            if (input_filename == NULL) {
+                input_filename = opts->input_files[i];
+            } else {
+                input_filename++; // 跳过斜杠
+            }
+            
+            // 安全地构建输出路径
+            size_t dir_len = strlen(opts->output_dir);
+            size_t file_len = strlen(input_filename);
+            
+            // 检查路径长度
+            if (dir_len + file_len + 2 > MAX_PATH) { // +2 for '/' and '\0'
+                printf("Error: Output path too long for file '%s'\n", input_filename);
+                xmlFreeDoc(doc);
+                return 0;
+            }
+            
+            // 复制目录路径
+            strncpy(new_path, opts->output_dir, MAX_PATH - 1);
+            new_path[MAX_PATH - 1] = '\0';
+            
+            // 确保目录路径以斜杠结尾
+            if (dir_len > 0 && new_path[dir_len - 1] != '/' && new_path[dir_len - 1] != '\\') {
+                if (dir_len + 1 < MAX_PATH) {
+                    new_path[dir_len] = '/';
+                    new_path[dir_len + 1] = '\0';
+                    dir_len++;
+                }
+            }
+            
+            // 安全地添加文件名
+            if (dir_len + file_len < MAX_PATH) {
+                strcpy(new_path + dir_len, input_filename);
+                output_path = new_path;
+            } else {
+                printf("Error: Output path too long\n");
+                xmlFreeDoc(doc);
+                return 0;
+            }
+        }
+
+        // 在每个文件处理前重新设置缩进字符串
+        xmlTreeIndentString = indent_str;
+
+        // 保存格式化后的文件
+        if (xmlSaveFormatFileEnc(output_path, doc, "UTF-8", format_output) < 0) {
+            printf("Error: Cannot save formatted file '%s'\n", output_path);
+            xmlFreeDoc(doc);
+            return 0;
+        }
+
+        xmlFreeDoc(doc);
+        
+        // 根据是否覆盖源文件显示不同的提示信息
+        if (strcmp(opts->output_dir, ".") == 0) {
+            printf("File formatted in place: %s\n", output_path);
+        } else {
+            printf("Formatted file saved to: %s\n", output_path);
+        }
+    }
+
+    return 1;
+}
+
 int main(int argc, char *argv[]) {
     // Initialize libxml2
     LIBXML_TEST_VERSION
@@ -495,6 +696,31 @@ int main(int argc, char *argv[]) {
             printf("Generate mode not implemented\n");
             break;
             
+        case MODE_FORMAT: {
+            // Create new argument array, keep program name
+            char** new_argv = (char**)malloc((argc - 1) * sizeof(char*));
+            if (!new_argv) {
+                printf("Error: Memory allocation failed\n");
+                if (using_cmd_file) free_command_args(cmd_argv);
+                return 1;
+            }
+            new_argv[0] = argv[0];
+            for (int i = 2; i < argc; i++) {
+                new_argv[i-1] = argv[i];
+            }
+            success = parse_format_options(argc - 1, new_argv, &opts);
+            free(new_argv);
+            
+            if (success) {
+                printf("Format mode:\n");
+                for (int i = 0; i < opts.input_file_count; i++) {
+                    printf("Processing file %d: %s\n", i + 1, opts.input_files[i]);
+                }
+                success = format_arxml_files(&opts);
+            }
+            break;
+        }
+        
         default:
             success = 0;
             break;

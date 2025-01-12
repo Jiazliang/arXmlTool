@@ -269,6 +269,31 @@ EOF
     </AR-PACKAGES>
 </AUTOSAR>
 EOF
+
+    # 添加 format 测试用的文件
+    cat > test_files/format_test.arxml << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<AUTOSAR xmlns="http://autosar.org/schema/r4.0">
+<AR-PACKAGES>
+<AR-PACKAGE>
+<SHORT-NAME>FormatTest</SHORT-NAME>
+<ELEMENTS>
+<ECUC-CONTAINER-VALUE>
+<SHORT-NAME>NoIndent</SHORT-NAME>
+<PARAMETERS>
+<ECUC-INTEGER-PARAM-VALUE>
+<VALUE>42</VALUE>
+</ECUC-INTEGER-PARAM-VALUE>
+</PARAMETERS>
+</ECUC-CONTAINER-VALUE>
+</ELEMENTS>
+</AR-PACKAGE>
+</AR-PACKAGES>
+</AUTOSAR>
+EOF
+
+    # 创建用于测试输出目录的文件夹
+    mkdir -p test_files/format_output
 }
 
 # Main test process
@@ -429,4 +454,89 @@ echo "Command: ./arXmlTool.exe merge -a test_files/indent_test.arxml -m test_fil
 echo "Verification Criteria:"
 echo "1. Should show error message about invalid indentation style"
 echo "2. Should not create output file"
+echo ""
+
+echo "Test Case 8: Format Mode Tests"
+echo "-------------------"
+
+echo "Test Case 8.1: Format with Tab Indentation (In-place)"
+echo "Command: ./arXmlTool.exe format -a test_files/format_test.arxml -i tab"
+cp test_files/format_test.arxml test_files/format_test_tab.arxml
+./arXmlTool.exe format -a test_files/format_test_tab.arxml -i tab
+echo "Verification Criteria:"
+echo "1. Check formatted file content:"
+echo "   - Should use tab characters for indentation"
+echo "   - Original file structure should be preserved"
+echo "2. Check indentation (showing first few lines with visible tabs):"
+sed 's/\t/[TAB]/g' test_files/format_test_tab.arxml | head -n 10
+echo ""
+
+echo "Test Case 8.2: Format with 2-Space Indentation (Output Directory)"
+echo "Command: ./arXmlTool.exe format -a test_files/format_test.arxml -i 2 -o test_files/format_output"
+./arXmlTool.exe format -a test_files/format_test.arxml -i 2 -o test_files/format_output
+echo "Verification Criteria:"
+echo "1. Check formatted file content:"
+echo "   - Should use 2 spaces for indentation"
+echo "   - Original file should remain unchanged"
+echo "   - New file should be created in format_output directory"
+echo "2. Check indentation (showing first few lines):"
+head -n 10 test_files/format_output/format_test.arxml
+echo "3. Compare with original file:"
+echo "Original file first line indentation:"
+head -n 3 test_files/format_test.arxml
+echo "Formatted file first line indentation:"
+head -n 3 test_files/format_output/format_test.arxml
+echo ""
+
+echo "Test Case 8.3: Format Multiple Files"
+echo "Command: ./arXmlTool.exe format -a test_files/format_test.arxml -a test_files/indent_test.arxml -i 4 -o test_files/format_output/case8.3"
+# 创建专门的测试目录
+mkdir -p test_files/format_output/case8.3
+./arXmlTool.exe format -a test_files/format_test.arxml -a test_files/indent_test.arxml -i 4 -o test_files/format_output/case8.3
+echo "Verification Criteria:"
+echo "1. Check if both files are formatted:"
+echo "   - Both files should use 4 spaces for indentation"
+echo "   - Both files should be in format_output/case8.3 directory"
+echo "2. Check files existence and content:"
+ls -l test_files/format_output/case8.3/format_test.arxml test_files/format_output/case8.3/indent_test.arxml
+echo "3. Check indentation of first file:"
+head -n 10 test_files/format_output/case8.3/format_test.arxml
+echo "4. Check indentation of second file:"
+head -n 10 test_files/format_output/case8.3/indent_test.arxml
+echo ""
+
+echo "Test Case 8.4: Format with Invalid Style"
+echo "Command: ./arXmlTool.exe format -a test_files/format_test.arxml -i 3"
+./arXmlTool.exe format -a test_files/format_test.arxml -i 3
+echo "Verification Criteria:"
+echo "1. Should show error message about invalid indentation style"
+echo "2. Original file should remain unchanged"
+echo ""
+
+echo "Test Case 8.5: Format Using Command File"
+# Create command file for format mode
+cat > test_files/format_command.txt << 'EOF'
+format -a test_files/format_test.arxml -i tab -o test_files/format_output/case8.5
+EOF
+# 创建专门的测试目录
+mkdir -p test_files/format_output/case8.5
+echo "Command: ./arXmlTool.exe -f test_files/format_command.txt"
+./arXmlTool.exe -f test_files/format_command.txt
+echo "Verification Criteria:"
+echo "1. Check if command file is processed correctly"
+echo "2. Check if file is formatted with tab indentation"
+echo "3. Check formatted file location and content:"
+ls -l test_files/format_output/case8.5/format_test.arxml
+echo "4. Check indentation (showing first few lines with visible tabs):"
+sed 's/\t/[TAB]/g' test_files/format_output/case8.5/format_test.arxml | head -n 5
+echo ""
+
+echo "Test Case 8.6: Format Without Output Directory (In-place Modification)"
+cp test_files/format_test.arxml test_files/format_test_inplace.arxml
+echo "Command: ./arXmlTool.exe format -a test_files/format_test_inplace.arxml -i 4"
+./arXmlTool.exe format -a test_files/format_test_inplace.arxml -i 4
+echo "Verification Criteria:"
+echo "1. Check if original file is modified in place"
+echo "2. Check indentation of modified file:"
+head -n 10 test_files/format_test_inplace.arxml
 echo "" 
