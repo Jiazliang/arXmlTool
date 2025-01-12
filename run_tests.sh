@@ -247,6 +247,28 @@ EOF
     </AR-PACKAGES>
 </AUTOSAR>
 EOF
+
+    # 添加缩进测试用的文件
+    cat > test_files/indent_test.arxml << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<AUTOSAR xmlns="http://autosar.org/schema/r4.0">
+    <AR-PACKAGES>
+        <AR-PACKAGE>
+            <SHORT-NAME>IndentTest</SHORT-NAME>
+            <ELEMENTS>
+                <ECUC-CONTAINER-VALUE>
+                    <SHORT-NAME>TestConfig</SHORT-NAME>
+                    <PARAMETERS>
+                        <ECUC-INTEGER-PARAM-VALUE>
+                            <VALUE>42</VALUE>
+                        </ECUC-INTEGER-PARAM-VALUE>
+                    </PARAMETERS>
+                </ECUC-CONTAINER-VALUE>
+            </ELEMENTS>
+        </AR-PACKAGE>
+    </AR-PACKAGES>
+</AUTOSAR>
+EOF
 }
 
 # Main test process
@@ -362,4 +384,49 @@ echo "   - All containers should maintain their original structure"
 echo "   - Order of containers should match input order"
 echo "2. Check merged file content:"
 cat test_files/merged_noconflict.arxml
+echo ""
+
+echo "Test Case 7: Indentation Tests"
+echo "-------------------"
+
+echo "Test Case 7.1: Tab Indentation"
+echo "Command: ./arXmlTool.exe merge -a test_files/indent_test.arxml -m test_files/merged_tab.arxml -i tab"
+./arXmlTool.exe merge -a test_files/indent_test.arxml -m test_files/merged_tab.arxml -i tab
+echo "Verification Criteria:"
+echo "1. Check merged_tab.arxml content:"
+echo "   - Should use tab characters for indentation"
+echo "   - Structure should be preserved"
+echo "2. Check indentation (showing first few lines):"
+echo "File content with visible tabs:"
+sed 's/\t/[TAB]/g' test_files/merged_tab.arxml | head -n 10
+echo ""
+
+echo "Test Case 7.2: 2-Space Indentation"
+echo "Command: ./arXmlTool.exe merge -a test_files/indent_test.arxml -m test_files/merged_2space.arxml -i 2"
+./arXmlTool.exe merge -a test_files/indent_test.arxml -m test_files/merged_2space.arxml -i 2
+echo "Verification Criteria:"
+echo "1. Check merged_2space.arxml content:"
+echo "   - Should use 2 spaces for indentation"
+echo "   - Structure should be preserved"
+echo "2. Check indentation (showing first few lines):"
+head -n 10 test_files/merged_2space.arxml
+echo ""
+
+echo "Test Case 7.3: 4-Space Indentation (Default)"
+echo "Command: ./arXmlTool.exe merge -a test_files/indent_test.arxml -m test_files/merged_4space.arxml -i 4"
+./arXmlTool.exe merge -a test_files/indent_test.arxml -m test_files/merged_4space.arxml -i 4
+echo "Verification Criteria:"
+echo "1. Check merged_4space.arxml content:"
+echo "   - Should use 4 spaces for indentation"
+echo "   - Structure should be preserved"
+echo "2. Check indentation (showing first few lines):"
+head -n 10 test_files/merged_4space.arxml
+echo ""
+
+echo "Test Case 7.4: Invalid Indentation Style"
+echo "Command: ./arXmlTool.exe merge -a test_files/indent_test.arxml -m test_files/merged_invalid.arxml -i 3"
+./arXmlTool.exe merge -a test_files/indent_test.arxml -m test_files/merged_invalid.arxml -i 3
+echo "Verification Criteria:"
+echo "1. Should show error message about invalid indentation style"
+echo "2. Should not create output file"
 echo "" 

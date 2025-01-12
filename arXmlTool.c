@@ -29,6 +29,11 @@ typedef struct {
     int input_file_count;
     char output_file[MAX_PATH];
     char output_dir[MAX_PATH];
+    enum {
+        INDENT_TAB,    // Tab缩进
+        INDENT_2SPACE, // 2空格缩进
+        INDENT_4SPACE  // 4空格缩进
+    } indent_style;
 } ProgramOptions;
 
 static xmlChar* get_short_name(xmlNodePtr node);
@@ -58,7 +63,7 @@ void print_usage() {
 int parse_merge_options(int argc, char *argv[], ProgramOptions *opts) {
     int opt;
     opts->input_file_count = 0;
-    memset(opts->output_file, 0, MAX_PATH);  // Clear output filename
+    opts->indent_style = INDENT_4SPACE; // 默认使用4空格缩进
     
     // Set default output directory to current directory
     strncpy(opts->output_dir, ".", MAX_PATH - 1);
@@ -66,7 +71,7 @@ int parse_merge_options(int argc, char *argv[], ProgramOptions *opts) {
     // Reset getopt
     optind = 0;
     
-    while ((opt = getopt(argc, argv, "a:m:o:")) != -1) {
+    while ((opt = getopt(argc, argv, "a:m:o:i:")) != -1) {
         switch (opt) {
             case 'a':
                 if (opts->input_file_count >= MAX_FILES) {
@@ -81,6 +86,18 @@ int parse_merge_options(int argc, char *argv[], ProgramOptions *opts) {
                 break;
             case 'o':
                 strncpy(opts->output_dir, optarg, MAX_PATH - 1);
+                break;
+            case 'i':
+                if (strcmp(optarg, "tab") == 0) {
+                    opts->indent_style = INDENT_TAB;
+                } else if (strcmp(optarg, "2") == 0) {
+                    opts->indent_style = INDENT_2SPACE;
+                } else if (strcmp(optarg, "4") == 0) {
+                    opts->indent_style = INDENT_4SPACE;
+                } else {
+                    printf("Error: Invalid indent style '%s'. Use 'tab', '2' or '4'\n", optarg);
+                    return 0;
+                }
                 break;
             case '?':
                 printf("Error: Invalid option or missing argument\n");
@@ -253,9 +270,28 @@ int merge_arxml_files(const ProgramOptions *opts) {
         xmlFreeDoc(doc);
     }
     
-    // Save merged document
+    // 根据缩进样式设置输出格式
+    int format_output = 1;  // 启用格式化输出
+    switch (opts->indent_style) {
+        case INDENT_TAB:
+            xmlTreeIndentString = "\t";
+            break;
+        case INDENT_2SPACE:
+            xmlTreeIndentString = "  ";
+            break;
+        case INDENT_4SPACE:
+            xmlTreeIndentString = "    ";
+            break;
+        default:
+            xmlTreeIndentString = "    "; // 默认使用4空格
+    }
+
+    // 设置输出格式
     xmlKeepBlanksDefault(0);
-    if (xmlSaveFormatFileEnc(opts->output_file, base_doc, "UTF-8", 2) < 0) {
+    xmlIndentTreeOutput = 1;
+
+    // 保存文档
+    if (xmlSaveFormatFileEnc(opts->output_file, base_doc, "UTF-8", format_output) < 0) {
         printf("Error: Cannot save output file '%s'\n", opts->output_file);
         xmlFreeDoc(base_doc);
         return 0;
