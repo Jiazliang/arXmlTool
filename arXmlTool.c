@@ -82,9 +82,6 @@ int parse_merge_options(int argc, char *argv[], ProgramOptions *opts) {
     // Set default output directory to current directory
     strncpy(opts->output_dir, ".", MAX_PATH - 1);
     
-    // Reset getopt
-    optind = 0;
-    
     while ((opt = getopt(argc, argv, "a:m:o:i:")) != -1) {
         switch (opt) {
             case 'a':
@@ -632,84 +629,72 @@ int main(int argc, char *argv[]) {
     int cmd_argc = 0;
     int using_cmd_file = 0;
 
-    // Check if using command file
-    if (argc == 3 && strcmp(argv[1], "-f") == 0) {
-        cmd_argv = read_command_from_file(argv[2], &cmd_argc);
-        if (!cmd_argv) {
-            return 1;
-        }
-        argv = cmd_argv;
-        argc = cmd_argc;
-        using_cmd_file = 1;
-    }
-
     if (argc < 2) {
         print_usage();
-        if (using_cmd_file) free_command_args(cmd_argv);
         return 1;
     }
 
+    // 首先解析操作模式
     ProgramOptions opts = {0};
     opts.mode = parse_mode(argv[1]);
 
     if (opts.mode == MODE_UNKNOWN) {
         printf("Error: Unknown operation mode '%s'\n", argv[1]);
         print_usage();
-        if (using_cmd_file) free_command_args(cmd_argv);
         return 1;
+    }
+
+    // 检查是否使用命令文件
+    if (argc == 4 && strcmp(argv[2], "-f") == 0) {
+        cmd_argv = read_command_from_file(argv[3], &cmd_argc);
+        if (!cmd_argv) {
+            return 1;
+        }
+        // 直接使用从文件读取的参数，不需要添加程序名和模式
+        argv = cmd_argv;
+        argc = cmd_argc;
+        using_cmd_file = 1;
     }
 
     int success = 0;
     switch (opts.mode) {
         case MODE_MERGE: {
-            // Create new argument array, keep program name
-            char** new_argv = (char**)malloc((argc - 1) * sizeof(char*));
-            if (!new_argv) {
-                printf("Error: Memory allocation failed\n");
-                if (using_cmd_file) free_command_args(cmd_argv);
-                return 1;
+            // Reset getopt before parsing options
+            optind = 1;  // 改为从1开始，因为0是程序名
+            
+            if (using_cmd_file) {
+                // 从文件读取的参数直接使用
+                success = parse_merge_options(argc, argv, &opts);
+            } else {
+                // 从命令行输入的参数需要跳过模式名
+                success = parse_merge_options(argc - 1, argv + 1, &opts);
             }
-            new_argv[0] = argv[0];  // Keep program name
-            for (int i = 2; i < argc; i++) {
-                new_argv[i-1] = argv[i];
-            }
-            success = parse_merge_options(argc - 1, new_argv, &opts);
-            free(new_argv);
             
             if (success) {
                 printf("Merge mode:\n");
                 for (int i = 0; i < opts.input_file_count; i++) {
                     printf("Input file %d: %s\n", i + 1, opts.input_files[i]);
                 }
-                
-                // Execute merge operation
                 success = merge_arxml_files(&opts);
             }
             break;
         }
-            
         case MODE_COMPARE:
             printf("Compare mode not implemented\n");
             break;
-            
         case MODE_GENERATE:
             printf("Generate mode not implemented\n");
             break;
-            
         case MODE_FORMAT: {
-            // Create new argument array, keep program name
-            char** new_argv = (char**)malloc((argc - 1) * sizeof(char*));
-            if (!new_argv) {
-                printf("Error: Memory allocation failed\n");
-                if (using_cmd_file) free_command_args(cmd_argv);
-                return 1;
+            optind = 1;  // Reset getopt
+            
+            if (using_cmd_file) {
+                // 从文件读取的参数直接使用
+                success = parse_format_options(argc, argv, &opts);
+            } else {
+                // 从命令行输入的参数需要跳过模式名
+                success = parse_format_options(argc - 1, argv + 1, &opts);
             }
-            new_argv[0] = argv[0];
-            for (int i = 2; i < argc; i++) {
-                new_argv[i-1] = argv[i];
-            }
-            success = parse_format_options(argc - 1, new_argv, &opts);
-            free(new_argv);
             
             if (success) {
                 printf("Format mode:\n");
@@ -720,7 +705,6 @@ int main(int argc, char *argv[]) {
             }
             break;
         }
-        
         default:
             success = 0;
             break;
@@ -728,11 +712,15 @@ int main(int argc, char *argv[]) {
 
     if (!success) {
         print_usage();
-        if (using_cmd_file) free_command_args(cmd_argv);
+        if (using_cmd_file) {
+            free_command_args(cmd_argv);
+        }
         return 1;
     }
 
-    if (using_cmd_file) free_command_args(cmd_argv);
+    if (using_cmd_file) {
+        free_command_args(cmd_argv);
+    }
     
     // Cleanup libxml2
     xmlCleanupParser();
