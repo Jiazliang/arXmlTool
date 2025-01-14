@@ -1,1 +1,0 @@
-merge -a test_files/duplicate1.arxml -a test_files/duplicate2.arxml -m test_files/merged_from_file.arxml

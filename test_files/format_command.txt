@@ -1,1 +1,0 @@
-format -a test_files/format_test.arxml -i tab -o test_files/format_output/case8.5
