@@ -2,15 +2,15 @@
 <AUTOSAR xmlns="http://autosar.org/schema/r4.0">
     <AR-PACKAGES>
         <AR-PACKAGE>
-            <SHORT-NAME>IndentTest</SHORT-NAME>
+            <SHORT-NAME>Container1</SHORT-NAME>
             <ELEMENTS>
                 <ECUC-CONTAINER-VALUE>
-                    <SHORT-NAME>TestConfig</SHORT-NAME>
-                    <PARAMETERS>
-                        <ECUC-INTEGER-PARAM-VALUE>
+                    <SHORT-NAME>Config1</SHORT-NAME>
+                    <PARAMETER-VALUES>
+                        <ECUC-NUMERICAL-PARAM-VALUE>
                             <VALUE>42</VALUE>
-                        </ECUC-INTEGER-PARAM-VALUE>
-                    </PARAMETERS>
+                        </ECUC-NUMERICAL-PARAM-VALUE>
+                    </PARAMETER-VALUES>
                 </ECUC-CONTAINER-VALUE>
             </ELEMENTS>
         </AR-PACKAGE>

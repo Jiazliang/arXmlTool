@@ -163,20 +163,43 @@ char** read_command_from_file(const char* filename, int* argc) {
         return NULL;
     }
 
+    // 读取所有行并合并成一行
+    char buffer[MAX_BUFFER_SIZE] = {0};
     char line[MAX_CMD_LENGTH];
-    if (!fgets(line, sizeof(line), file)) {
-        printf("Error: Command file is empty\n");
-        fclose(file);
-        return NULL;
+    while (fgets(line, sizeof(line), file)) {
+        // 移除行尾的换行符
+        line[strcspn(line, "\r\n")] = 0;
+        
+        // 跳过空行
+        if (strlen(line) == 0) {
+            continue;
+        }
+        
+        // 如果buffer不为空，添加一个空格作为分隔符
+        if (strlen(buffer) > 0) {
+            strcat(buffer, " ");
+        }
+        
+        // 检查buffer是否有足够空间
+        if (strlen(buffer) + strlen(line) >= MAX_BUFFER_SIZE - 1) {
+            printf("Error: Command line too long\n");
+            fclose(file);
+            return NULL;
+        }
+        
+        // 添加当前行到buffer
+        strcat(buffer, line);
     }
     fclose(file);
 
-    // Remove trailing newline
-    line[strcspn(line, "\r\n")] = 0;
+    if (strlen(buffer) == 0) {
+        printf("Error: Command file is empty\n");
+        return NULL;
+    }
 
     // Count arguments
     int count = 1; // Program name takes first position
-    char* p = line;
+    char* p = buffer;
     while (*p) {
         if (*p == ' ' || *p == '\t') {
             count++;
@@ -198,7 +221,7 @@ char** read_command_from_file(const char* filename, int* argc) {
 
     // Split command line
     int i = 1;
-    char* token = strtok(line, " \t");
+    char* token = strtok(buffer, " \t");
     while (token) {
         argv[i] = strdup(token);
         token = strtok(NULL, " \t");

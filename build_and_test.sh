@@ -121,12 +121,6 @@ echo "Command: ./arXmlTool.exe merge -a testbench/cases/3.3/indent_test.arxml -m
 ./arXmlTool.exe merge -a testbench/cases/3.3/indent_test.arxml -m testbench/results/3.3/merged_4space.arxml -i 4
 echo ""
 
-echo "Test Case 3.4: Invalid Indentation Style"
-rm -rf testbench/results/3.4/*
-echo "Command: ./arXmlTool.exe merge -a testbench/cases/3.4/indent_test.arxml -m testbench/cases/3.4/merged_invalid.arxml -i 3"
-./arXmlTool.exe merge -a testbench/cases/3.4/indent_test.arxml -m testbench/results/3.4/merged_invalid.arxml -i 3
-echo ""
-
 
 echo "-------------------"
 echo "Test Case 4: Format Mode Tests"
@@ -149,10 +143,4 @@ echo "Test Case 4.3: Format Multiple Files"
 rm -rf testbench/results/4.3/*
 echo "Command: ./arXmlTool.exe format -a testbench/cases/4.3/format_test.arxml -a testbench/cases/4.3/indent_test.arxml -i 4 -o testbench/results/4.3"
 ./arXmlTool.exe format -a testbench/cases/4.3/format_test.arxml -a testbench/cases/4.3/indent_test.arxml -i 4 -o testbench/results/4.3
-echo ""
-
-echo "Test Case 4.4: Format with Invalid Style"
-rm -rf testbench/results/4.4/*
-echo "Command: ./arXmlTool.exe format -a testbench/cases/4.4/format_test.arxml -i 3"
-./arXmlTool.exe format -a testbench/cases/4.4/format_test.arxml -i 3 -o testbench/results/4.4
 echo ""

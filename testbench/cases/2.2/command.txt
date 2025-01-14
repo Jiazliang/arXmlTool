@@ -1,3 +1,4 @@
--a testbench/cases/2.1//duplicate1.arxml 
--a testbench/cases/2.1//duplicate2.arxml 
--m testbench/results/2.1//merged_from_file.arxml
+-a testbench/cases/2.2/duplicate1.arxml 
+  -a testbench/cases/2.2/duplicate2.arxml   
+
+    -m testbench/results/2.2/merged_from_file.arxml
