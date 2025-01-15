@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <getopt.h>
+#include "../utils/fs_utils.h"
 
 #ifdef _WIN32
 #include <io.h>
@@ -82,10 +83,10 @@ int parse_merge_options(int argc, char *argv[], ProgramOptions *opts) {
         fclose(file);
     }
     
-    /* Check if output directory exists | 检查输出目录是否存在 */
+    /* Create output directory if it doesn't exist | 如果输出目录不存在则创建 */
     if (strcmp(opts->output_dir, ".") != 0) {
-        if (access(opts->output_dir, F_OK) != 0) {
-            printf("Error: Output directory '%s' does not exist\n", opts->output_dir);
+        if (!create_directories(opts->output_dir)) {
+            printf("Error: Cannot create output directory '%s'\n", opts->output_dir);
             return 0;
         }
     }
@@ -159,10 +160,10 @@ int parse_format_options(int argc, char *argv[], ProgramOptions *opts) {
         fclose(file);
     }
     
-    /* Check if output directory exists | 检查输出目录是否存在 */
+    /* Create output directory if it doesn't exist | 如果输出目录不存在则创建 */
     if (strcmp(opts->output_dir, ".") != 0) {
-        if (access(opts->output_dir, F_OK) != 0) {
-            printf("Error: Output directory '%s' does not exist\n", opts->output_dir);
+        if (!create_directories(opts->output_dir)) {
+            printf("Error: Cannot create output directory '%s'\n", opts->output_dir);
             return 0;
         }
     }

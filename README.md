@@ -70,7 +70,8 @@ build/arXmlTool.exe <mode> -f <command_file>
 ### Merge 模式参数
 - `-a <file.arxml>`: 指定输入文件（可多次使用以指定多个输入文件）
 - `-m <file.arxml>`: 指定输出文件
-- `-o <directory>`: 指定输出目录（可选，默认为当前目录）
+- `-o <directory>`: 指定输出目录（可选）。如果指定了此参数，将忽略-m参数中的目录部分，
+                    仅使用其文件名，并将文件保存到-o指定的目录中
 - `-i <style>`: 指定输出文件的缩进样式（可选）
   - `tab`: 使用Tab缩进
   - `2`: 使用2空格缩进
@@ -87,11 +88,11 @@ build/arXmlTool.exe <mode> -f <command_file>
 # 合并两个文件（使用默认4空格缩进）
 build/arXmlTool.exe merge -a input1.arxml -a input2.arxml -m output.arxml
 
-# 使用Tab缩进合并文件
-build/arXmlTool.exe merge -a input1.arxml -a input2.arxml -m output.arxml -i tab
+# 使用Tab缩进合并文件，并指定输出目录（将生成 /output/dir/output.arxml）
+build/arXmlTool.exe merge -a input1.arxml -a input2.arxml -m /some/path/output.arxml -i tab -o /output/dir
 
-# 使用2空格缩进并指定输出目录
-build/arXmlTool.exe merge -a input1.arxml -a input2.arxml -m output.arxml -i 2 -o /output/dir
+# 使用2空格缩进并指定输出目录（将生成 /output/dir/result.arxml）
+build/arXmlTool.exe merge -a input1.arxml -a input2.arxml -m result.arxml -i 2 -o /output/dir
 
 # 格式化单个文件（覆盖原文件）
 build/arXmlTool.exe format -a input.arxml -i tab
@@ -106,7 +107,7 @@ build/arXmlTool.exe merge -f command.txt
 ## 注意事项
 
 1. 输入文件必须存在且可读
-2. 输出目录必须存在
+2. 如果指定的输出目录不存在，程序会自动创建（包括多级目录）
 3. 合并模式至少需要一个输入文件和一个输出文件
 4. 格式化模式至少需要一个输入文件
 5. 输入文件数量不能超过 1024 个

@@ -1,5 +1,6 @@
 #include "merge.h"
 #include "../utils/xml_utils.h"
+#include "../utils/fs_utils.h"  /* 添加头文件引用 */
 #include <stdio.h>
 #include <string.h>
 
@@ -81,6 +82,32 @@ static void merge_node(xmlNodePtr base_parent, xmlNodePtr input_node, xmlDocPtr 
     xmlAddChild(base_parent, copy);
 }
 
+/* Get final output path based on options | 根据选项获取最终输出路径 */
+static void get_final_output_path(const ProgramOptions *opts, char *final_path, size_t size) {
+    if (strcmp(opts->output_dir, ".") == 0) {
+        /* No -o parameter, use path from -m directly | 没有-o参数，直接使用-m的路径 */
+        strncpy(final_path, opts->output_file, size);
+        final_path[size - 1] = '\0';
+    } else {
+        /* -o parameter exists, combine output_dir with filename from -m | 存在-o参数，将output_dir与-m的文件名组合 */
+        char filename[MAX_PATH];
+        const char *last_slash = strrchr(opts->output_file, '/');
+        const char *last_backslash = strrchr(opts->output_file, '\\');
+        const char *last_separator = last_slash > last_backslash ? last_slash : last_backslash;
+        
+        /* Get filename from output_file | 从output_file中获取文件名 */
+        if (last_separator) {
+            strncpy(filename, last_separator + 1, sizeof(filename));
+        } else {
+            strncpy(filename, opts->output_file, sizeof(filename));
+        }
+        filename[sizeof(filename) - 1] = '\0';
+        
+        /* Combine output_dir with filename | 组合output_dir和文件名 */
+        snprintf(final_path, size, "%s/%s", opts->output_dir, filename);
+    }
+}
+
 /* Merge ARXML files implementation | ARXML文件合并实现 */
 int merge_arxml_files(const ProgramOptions *opts) {
     xmlDocPtr base_doc = NULL;
@@ -148,9 +175,22 @@ int merge_arxml_files(const ProgramOptions *opts) {
     xmlKeepBlanksDefault(0);
     xmlIndentTreeOutput = 1;
 
+    /* Get final output path | 获取最终输出路径 */
+    char final_output_path[MAX_PATH];
+    get_final_output_path(opts, final_output_path, sizeof(final_output_path));
+
+    /* Create output directory if needed | 如果需要则创建输出目录 */
+    char output_dir[MAX_PATH];
+    get_directory_path(final_output_path, output_dir, sizeof(output_dir));
+    if (!create_directories(output_dir)) {
+        printf("Error: Cannot create output directory for file '%s'\n", final_output_path);
+        xmlFreeDoc(base_doc);
+        return 0;
+    }
+
     /* Save document | 保存文档 */
-    if (xmlSaveFormatFileEnc(opts->output_file, base_doc, "UTF-8", format_output) < 0) {
-        printf("Error: Cannot save output file '%s'\n", opts->output_file);
+    if (xmlSaveFormatFileEnc(final_output_path, base_doc, "UTF-8", format_output) < 0) {
+        printf("Error: Cannot save output file '%s'\n", final_output_path);
         xmlFreeDoc(base_doc);
         return 0;
     }
@@ -158,7 +198,7 @@ int merge_arxml_files(const ProgramOptions *opts) {
     xmlFreeDoc(base_doc);
     /* Print completion message | 打印完成消息 */
     if (opts->input_file_count > 1) {
-        printf("Merge completed, output file: %s\n", opts->output_file);
+        printf("Merge completed, output file: %s\n", final_output_path);
     }
     return 1;
 } 
