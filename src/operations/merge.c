@@ -3,6 +3,19 @@
 #include "../utils/fs_utils.h"  /* 添加头文件引用 */
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <libxml/parser.h>
+
+/* Create a string with n spaces for indentation | 创建包含n个空格的缩进字符串 */
+static const char* create_space_indent(int n) {
+    static char indent_buf[32] = {0};  /* 足够容纳大量空格 */
+    if (n <= 0) n = 4;  /* 如果指定无效数值，使用4空格 */
+    if (n > 31) n = 31; /* 限制最大空格数 */
+    
+    memset(indent_buf, ' ', n);
+    indent_buf[n] = '\0';
+    return indent_buf;
+}
 
 /* Recursively merge nodes | 递归合并节点 */
 static void merge_node(xmlNodePtr base_parent, xmlNodePtr input_node, xmlDocPtr doc) {
@@ -113,6 +126,12 @@ int merge_arxml_files(const ProgramOptions *opts) {
     xmlDocPtr base_doc = NULL;
     xmlNodePtr root_node = NULL;
     
+    /* Initialize detected indentation style | 初始化检测到的缩进风格 */
+    DetectedIndentStyle detected = {.style = 's', .width = 4};  /* Default to 4 spaces | 默认4空格 */
+    if (opts->indent_style == INDENT_DEFAULT) {
+        detected = detect_indent_style(opts->input_files[0]);
+    }
+
     /* Parse base file | 解析基础文件 */
     base_doc = xmlReadFile(opts->input_files[0], NULL, XML_PARSE_NOBLANKS | XML_PARSE_NOBLANKS | XML_PARSE_COMPACT);
     if (base_doc == NULL) {
@@ -155,25 +174,21 @@ int merge_arxml_files(const ProgramOptions *opts) {
         xmlFreeDoc(doc);
     }
     
-    /* Set output format based on indentation style | 根据缩进样式设置输出格式 */
-    int format_output = 1;  /* Enable formatted output | 启用格式化输出 */
-    switch (opts->indent_style) {
-        case INDENT_TAB:
-            xmlTreeIndentString = "\t";
-            break;
-        case INDENT_2SPACE:
-            xmlTreeIndentString = "  ";
-            break;
-        case INDENT_4SPACE:
-            xmlTreeIndentString = "    ";
-            break;
-        default:
-            xmlTreeIndentString = "    "; /* Default to 4 spaces | 默认使用4空格 */
-    }
-
-    /* Configure output settings | 配置输出设置 */
+    /* Set indentation for output | 设置输出的缩进 */
     xmlKeepBlanksDefault(0);
     xmlIndentTreeOutput = 1;
+
+    if (opts->indent_style == INDENT_DEFAULT) {
+        /* Use detected indentation | 使用检测到的缩进 */
+        xmlTreeIndentString = (detected.style == 't') ? "\t" : 
+                            create_space_indent(detected.width);
+    } else if (opts->indent_style == INDENT_TAB) {
+        /* Use tab indentation | 使用制表符缩进 */
+        xmlTreeIndentString = "\t";
+    } else if (opts->indent_style == INDENT_SPACE) {
+        /* Use specified number of spaces | 使用指定数量的空格 */
+        xmlTreeIndentString = create_space_indent(opts->indent_width);
+    }
 
     /* Get final output path | 获取最终输出路径 */
     char final_output_path[MAX_PATH];
@@ -188,9 +203,9 @@ int merge_arxml_files(const ProgramOptions *opts) {
         return 0;
     }
 
-    /* Save document | 保存文档 */
-    if (xmlSaveFormatFileEnc(final_output_path, base_doc, "UTF-8", format_output) < 0) {
-        printf("Error: Cannot save output file '%s'\n", final_output_path);
+    /* Save the merged document | 保存合并后的文档 */
+    if (xmlSaveFormatFileEnc(final_output_path, base_doc, "UTF-8", 1) < 0) {
+        printf("Error: Cannot save file '%s'\n", final_output_path);
         xmlFreeDoc(base_doc);
         return 0;
     }

@@ -24,8 +24,7 @@ typedef enum {
 typedef enum {
     INDENT_DEFAULT = -1,  /* Use source file's style | 使用源文件的风格 */
     INDENT_TAB = 0,      /* Tab indentation | Tab缩进 */
-    INDENT_2SPACE = 1,   /* 2 spaces indentation | 2空格缩进 */
-    INDENT_4SPACE = 2    /* 4 spaces indentation | 4空格缩进 */
+    INDENT_SPACE = 1     /* Space indentation | 空格缩进 */
 } IndentStyle;
 
 /* Program options | 程序选项 */
@@ -36,6 +35,7 @@ typedef struct {
     char output_file[MAX_PATH];
     char output_dir[MAX_PATH];
     IndentStyle indent_style;
+    int indent_width;        /* Number of spaces for indentation | 缩进的空格数 */
     SortOrder sort_order;
 } ProgramOptions;
 

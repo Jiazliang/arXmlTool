@@ -1,6 +1,7 @@
 #include "options.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <getopt.h>
 #include "../utils/fs_utils.h"
 
@@ -70,13 +71,16 @@ int parse_merge_options(int argc, char *argv[], ProgramOptions *opts) {
             case 'i':
                 if (strcmp(optarg, "tab") == 0) {
                     opts->indent_style = INDENT_TAB;
-                } else if (strcmp(optarg, "2") == 0) {
-                    opts->indent_style = INDENT_2SPACE;
-                } else if (strcmp(optarg, "4") == 0) {
-                    opts->indent_style = INDENT_4SPACE;
                 } else {
-                    printf("Error: Invalid indent style '%s'. Use 'tab', '2' or '4'\n", optarg);
-                    return 0;
+                    /* Try to parse number of spaces | 尝试解析空格数 */
+                    char* endptr;
+                    long spaces = strtol(optarg, &endptr, 10);
+                    if (*endptr != '\0' || spaces <= 0) {
+                        printf("Error: Invalid indent style '%s'. Use 'tab' or a positive number\n", optarg);
+                        return 0;
+                    }
+                    opts->indent_style = INDENT_SPACE;
+                    opts->indent_width = (int)spaces;
                 }
                 break;
             case '?':
@@ -117,13 +121,16 @@ int parse_format_options(int argc, char *argv[], ProgramOptions *opts) {
             case 'i':
                 if (strcmp(optarg, "tab") == 0) {
                     opts->indent_style = INDENT_TAB;
-                } else if (strcmp(optarg, "2") == 0) {
-                    opts->indent_style = INDENT_2SPACE;
-                } else if (strcmp(optarg, "4") == 0) {
-                    opts->indent_style = INDENT_4SPACE;
                 } else {
-                    printf("Error: Invalid indent style '%s'. Use 'tab', '2' or '4'\n", optarg);
-                    return 0;
+                    /* Try to parse number of spaces | 尝试解析空格数 */
+                    char* endptr;
+                    long spaces = strtol(optarg, &endptr, 10);
+                    if (*endptr != '\0' || spaces <= 0) {
+                        printf("Error: Invalid indent style '%s'. Use 'tab' or a positive number\n", optarg);
+                        return 0;
+                    }
+                    opts->indent_style = INDENT_SPACE;
+                    opts->indent_width = (int)spaces;
                 }
                 break;
             case 's':

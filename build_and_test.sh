@@ -167,6 +167,11 @@ echo "Command: ./build/arXmlTool.exe format -a testbench/cases/4.6/format_test.a
 ./build/arXmlTool.exe format -a testbench/cases/4.6/format_test.arxml -s desc -i tab -o testbench/results/4.6
 echo ""
 
+echo "Test Case 4.7: Format with any Indentation"
+echo "Command: ./build/arXmlTool.exe format -a testbench/cases/4.7/format_test.arxml -i 8 -o testbench/results/4.7" 
+./build/arXmlTool.exe format -a testbench/cases/4.7/format_test.arxml -i 8 -o testbench/results/4.7
+echo ""
+
 echo "-------------------"
 echo "Test Case 5: Output Directory Tests"
 echo "-------------------"

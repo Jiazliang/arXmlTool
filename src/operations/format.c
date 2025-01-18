@@ -3,7 +3,19 @@
 #include "../utils/fs_utils.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <libxml/parser.h>
+
+/* Create a string with n spaces for indentation | 创建包含n个空格的缩进字符串 */
+static const char* create_space_indent(int n) {
+    static char indent_buf[32] = {0};  /* 足够容纳大量空格 */
+    if (n <= 0) n = 4;  /* 如果指定无效数值，使用4空格 */
+    if (n > 31) n = 31; /* 限制最大空格数 */
+    
+    memset(indent_buf, ' ', n);
+    indent_buf[n] = '\0';
+    return indent_buf;
+}
 
 int format_arxml_files(const ProgramOptions *opts) {
     for (int i = 0; i < opts->input_file_count; i++) {
@@ -61,11 +73,13 @@ int format_arxml_files(const ProgramOptions *opts) {
         if (opts->indent_style == INDENT_DEFAULT) {
             /* Use detected indentation | 使用检测到的缩进 */
             xmlTreeIndentString = (detected.style == 't') ? "\t" : 
-                                (detected.width == 2) ? "  " : "    ";
+                                create_space_indent(detected.width);
+        } else if (opts->indent_style == INDENT_TAB) {
+            /* Use tab indentation | 使用制表符缩进 */
+            xmlTreeIndentString = "\t";
         } else {
-            /* Use specified indentation | 使用指定的缩进 */
-            xmlTreeIndentString = (opts->indent_style == INDENT_TAB) ? "\t" : 
-                                (opts->indent_style == INDENT_2SPACE) ? "  " : "    ";
+            /* Use specified number of spaces | 使用指定数量的空格 */
+            xmlTreeIndentString = create_space_indent(opts->indent_width);
         }
 
         /* Create output directory if needed | 如果需要则创建输出目录 */

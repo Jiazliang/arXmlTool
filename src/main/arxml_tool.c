@@ -33,16 +33,16 @@ void print_usage(void) {
     printf("  -m <file.arxml>  Specify output file\n");
     printf("  -o <directory>   Specify output directory (optional)\n");
     printf("  -i <style>       Specify indentation style (optional)\n");
+    printf("                   - If not specified: Keep source file indentation\n");
     printf("                   - 'tab': Use tab for indentation\n");
-    printf("                   - '2': Use 2 spaces for indentation\n");
-    printf("                   - '4': Use 4 spaces for indentation (default)\n\n");
+    printf("                   - '<n>': Use n spaces for indentation (e.g. '2', '4', '8')\n\n");
     printf("Format mode options:\n");
     printf("  -a <file.arxml>  Specify input file (can be used multiple times)\n");
     printf("  -o <directory>   Specify output directory (optional, will overwrite source files if not specified)\n");
     printf("  -i <style>       Specify indentation style (optional)\n");
+    printf("                   - If not specified: Keep source file indentation\n");
     printf("                   - 'tab': Use tab for indentation\n");
-    printf("                   - '2': Use 2 spaces for indentation\n");
-    printf("                   - '4': Use 4 spaces for indentation (default)\n");
+    printf("                   - '<n>': Use n spaces for indentation (e.g. '2', '4', '8')\n\n");
 }
 
 /* Program entry point | 程序入口点 */
@@ -56,6 +56,7 @@ int main(int argc, char *argv[]) {
     memset(&opts, 0, sizeof(ProgramOptions));
     opts.mode = MODE_UNKNOWN;
     opts.indent_style = INDENT_DEFAULT;
+    opts.indent_width = 4;  /* Default to 4 spaces | 默认使用4空格缩进 */
     opts.sort_order = SORT_NONE;
     strncpy(opts.output_dir, ".", MAX_PATH - 1);
 
