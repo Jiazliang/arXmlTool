@@ -152,6 +152,21 @@ echo "Command: ./build/arXmlTool.exe format -a testbench/cases/4.3/format_test.a
 ./build/arXmlTool.exe format -a testbench/cases/4.3/format_test.arxml -a testbench/cases/4.3/indent_test.arxml -i 4 -o testbench/results/4.3
 echo ""
 
+echo "Test Case 4.4: Format with Sorting"
+echo "Command: ./build/arXmlTool.exe format -a testbench/cases/4.4/format_test.arxml -s asc -o testbench/results/4.4"
+./build/arXmlTool.exe format -a testbench/cases/4.4/format_test.arxml -s asc -o testbench/results/4.4
+echo ""
+
+echo "Test Case 4.5: Format with Sorting and Indentation"
+echo "Command: ./build/arXmlTool.exe format -a testbench/cases/4.5/format_test.arxml -s desc -i 2 -o testbench/results/4.5"
+./build/arXmlTool.exe format -a testbench/cases/4.5/format_test.arxml -s desc -i 2 -o testbench/results/4.5
+echo ""
+
+echo "Test Case 4.6: Format with Sorting and Indentation"
+echo "Command: ./build/arXmlTool.exe format -a testbench/cases/4.6/format_test.arxml -s desc -i tab -o testbench/results/4.6"
+./build/arXmlTool.exe format -a testbench/cases/4.6/format_test.arxml -s desc -i tab -o testbench/results/4.6
+echo ""
+
 echo "-------------------"
 echo "Test Case 5: Output Directory Tests"
 echo "-------------------"

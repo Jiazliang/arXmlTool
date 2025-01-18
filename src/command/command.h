@@ -1,10 +1,15 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-/* Read command line from file | 从文件读取命令行参数 */
+#include "../main/common.h"
+
+#define MAX_BUFFER_SIZE 4096
+#define MAX_CMD_LENGTH 1024
+
+/* Read commands from file | 从文件读取命令 */
 char** read_command_from_file(const char* filename, int* argc);
 
-/* Free command line arguments memory | 释放命令行参数内存 */
+/* Free command arguments | 释放命令参数内存 */
 void free_command_args(char** argv);
 
 #endif /* COMMAND_H */ 

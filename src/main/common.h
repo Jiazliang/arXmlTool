@@ -1,33 +1,42 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-/* Constants definition | 常量定义 */
-#define MAX_FILES 1024
 #define MAX_PATH 256
-#define MAX_CMD_LENGTH 4096
-#define MAX_BUFFER_SIZE 8192
+#define MAX_FILES 1024
 
-/* Operation modes enumeration | 操作模式枚举 */
+/* Operation mode | 操作模式 */
 typedef enum {
-    MODE_MERGE,    /* Merge mode | 合并模式 */
-    MODE_COMPARE,  /* Compare mode | 比较模式 */
-    MODE_GENERATE, /* Generate mode | 生成模式 */
-    MODE_FORMAT,   /* Format mode | 格式化模式 */
-    MODE_UNKNOWN   /* Unknown mode | 未知模式 */
+    MODE_UNKNOWN,
+    MODE_MERGE,
+    MODE_FORMAT,
+    MODE_COMPARE,
+    MODE_GENERATE
 } OperationMode;
 
-/* Program options structure | 程序选项结构 */
+/* Sort order for format/merge operations | 格式化/合并操作的排序方式 */
+typedef enum {
+    SORT_NONE = -1,  /* No sorting | 不排序 */
+    SORT_ASC = 0,    /* Ascending order | 升序 */
+    SORT_DESC = 1    /* Descending order | 降序 */
+} SortOrder;
+
+/* Indent style for format/merge operations | 格式化/合并操作的缩进风格 */
+typedef enum {
+    INDENT_DEFAULT = -1,  /* Use source file's style | 使用源文件的风格 */
+    INDENT_TAB = 0,      /* Tab indentation | Tab缩进 */
+    INDENT_2SPACE = 1,   /* 2 spaces indentation | 2空格缩进 */
+    INDENT_4SPACE = 2    /* 4 spaces indentation | 4空格缩进 */
+} IndentStyle;
+
+/* Program options | 程序选项 */
 typedef struct {
     OperationMode mode;
     char input_files[MAX_FILES][MAX_PATH];
     int input_file_count;
     char output_file[MAX_PATH];
     char output_dir[MAX_PATH];
-    enum {
-        INDENT_TAB,    /* Tab indentation | Tab缩进 */
-        INDENT_2SPACE, /* 2 spaces indentation | 2空格缩进 */
-        INDENT_4SPACE  /* 4 spaces indentation | 4空格缩进 */
-    } indent_style;
+    IndentStyle indent_style;
+    SortOrder sort_order;
 } ProgramOptions;
 
 #endif /* COMMON_H */ 

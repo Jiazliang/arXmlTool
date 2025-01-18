@@ -81,6 +81,11 @@ build/arXmlTool.exe <mode> -f <command_file>
 - `-a <file.arxml>`: 指定输入文件（可多次使用以指定多个输入文件）
 - `-o <directory>`: 指定输出目录（可选，默认覆盖源文件）
 - `-i <style>`: 指定缩进样式（可选，同merge模式）
+- `-s <order>`: 指定节点排序方式（可选）
+  - `asc`: 按SHORT-NAME升序排序
+  - `desc`: 按SHORT-NAME降序排序
+
+注：当同时使用-i和-s参数时，先执行排序，再处理缩进格式化。
 
 ### 基本使用示例
 
@@ -102,6 +107,12 @@ build/arXmlTool.exe format -a input1.arxml -a input2.arxml -i 2 -o /output/dir
 
 # 使用命令文件
 build/arXmlTool.exe merge -f command.txt
+
+# 格式化文件并按SHORT-NAME升序排序
+build/arXmlTool.exe format -a input.arxml -s asc
+
+# 格式化文件，先按SHORT-NAME降序排序，再使用2空格缩进
+build/arXmlTool.exe format -a input.arxml -s desc -i 2
 ```
 
 ## 注意事项
