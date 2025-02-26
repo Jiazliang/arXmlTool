@@ -37,8 +37,8 @@ INCLUDE_DIRS="-Isrc/main -Isrc/command -Isrc/operations -Isrc/utils"
 # 检测操作系统
 if [ "$OS" = "Windows_NT" ]; then
     # Windows 环境（假设使用 MinGW）
-    XML2_PATH="env/mingw64"
-    GCC_PATH="env/mingw64/bin/gcc.exe"
+    XML2_PATH="mingw64"
+    GCC_PATH="mingw64/bin/gcc.exe"
     
     # Windows 下的编译命令（静态链接）
     $GCC_PATH -Wall -Wextra \
