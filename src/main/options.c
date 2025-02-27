@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include "../utils/fs_utils.h"
+#include "../main/arxml_tool.h"
 
 #ifdef _WIN32
 #include <io.h>
@@ -38,6 +39,9 @@ int parse_options(int argc, char *argv[], ProgramOptions *opts) {
     } else if (strcmp(argv[1], "format") == 0) {
         opts->mode = MODE_FORMAT;
         return parse_format_options(argc - 1, argv + 1, opts);
+    } else if (strcmp(argv[1], "--help") == 0) {
+        print_usage();
+        return 0;
     } else {
         printf("Error: Unknown operation mode '%s'\n", argv[1]);
         return 0;
@@ -52,7 +56,7 @@ int parse_merge_options(int argc, char *argv[], ProgramOptions *opts) {
     /* Reset getopt | 重置getopt */
     optind = 1;
     
-    while ((opt = getopt(argc, argv, "a:m:o:i:")) != -1) {
+    while ((opt = getopt(argc, argv, "a:m:o:i:s:")) != -1) {
         switch (opt) {
             case 'a':
                 if (opts->input_file_count >= MAX_FILES) {
@@ -81,6 +85,16 @@ int parse_merge_options(int argc, char *argv[], ProgramOptions *opts) {
                     }
                     opts->indent_style = INDENT_SPACE;
                     opts->indent_width = (int)spaces;
+                }
+                break;
+                case 's':
+                if (strcmp(optarg, "asc") == 0) {
+                    opts->sort_order = SORT_ASC;
+                } else if (strcmp(optarg, "desc") == 0) {
+                    opts->sort_order = SORT_DESC;
+                } else {
+                    printf("Error: Invalid sort order '%s'. Use 'asc' or 'desc'\n", optarg);
+                    return 0;
                 }
                 break;
             case '?':

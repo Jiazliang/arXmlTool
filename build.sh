@@ -36,16 +36,16 @@ INCLUDE_DIRS="-Isrc/main -Isrc/command -Isrc/operations -Isrc/utils"
 
 # 检测操作系统
 if [ "$OS" = "Windows_NT" ]; then
-    # Windows 环境（假设使用 MinGW）
-    XML2_PATH="mingw64"
-    GCC_PATH="mingw64/bin/gcc.exe"
+    # 强制优先使用当前目录的 mingw64/bin/gcc
+    export PATH="$PWD/mingw64/bin:$PATH"
     
     # Windows 下的编译命令（静态链接）
-    $GCC_PATH -Wall -Wextra \
+    gcc -Wall -Wextra \
         $INCLUDE_DIRS \
-        -I"$XML2_PATH/include/libxml2" \
+        -I"mingw64/include" \
+        -I"mingw64/include/libxml2" \
         -o build/arXmlTool.exe $SRC_FILES \
-        -L"$XML2_PATH/lib" \
+        -L"mingw64/lib" \
         -static \
         -lxml2 -lz -llzma -liconv -lws2_32 \
         -DLIBXML_STATIC

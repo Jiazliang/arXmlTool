@@ -3,8 +3,8 @@
 
 #include "../main/common.h"
 
-#define MAX_BUFFER_SIZE 4096
-#define MAX_CMD_LENGTH 1024
+#define MAX_BUFFER_SIZE (MAX_PATH * MAX_FILES)
+#define MAX_CMD_LENGTH MAX_PATH
 
 /* Read commands from file | 从文件读取命令 */
 char** read_command_from_file(const char* filename, int* argc);

@@ -22,7 +22,8 @@ OperationMode parse_mode(const char* mode_str) {
 void print_usage(void) {
     printf("Usage:\n");
     printf("  arXmlTool.exe <mode> [options]\n");
-    printf("  arXmlTool.exe <mode> -f <command_file>\n\n");
+    printf("  arXmlTool.exe <mode> -f <command_file>\n");
+    printf("  arXmlTool.exe --help\n\n");
     printf("Modes:\n");
     printf("  merge    - Merge multiple ARXML files\n");
     printf("  compare  - Compare ARXML files\n");
@@ -35,14 +36,20 @@ void print_usage(void) {
     printf("  -i <style>       Specify indentation style (optional)\n");
     printf("                   - If not specified: Keep source file indentation\n");
     printf("                   - 'tab': Use tab for indentation\n");
-    printf("                   - '<n>': Use n spaces for indentation (e.g. '2', '4', '8')\n\n");
+    printf("                   - '<n>': Use n spaces for indentation (e.g. '2', '4', '8')\n");
+    printf("  -i <sort>       Specify indentation style (optional)\n");
+    printf("                   - 'asc': Sort in ascending\n");
+    printf("                   - 'desc': Sort in descending\n\n");
     printf("Format mode options:\n");
     printf("  -a <file.arxml>  Specify input file (can be used multiple times)\n");
     printf("  -o <directory>   Specify output directory (optional, will overwrite source files if not specified)\n");
     printf("  -i <style>       Specify indentation style (optional)\n");
     printf("                   - If not specified: Keep source file indentation\n");
     printf("                   - 'tab': Use tab for indentation\n");
-    printf("                   - '<n>': Use n spaces for indentation (e.g. '2', '4', '8')\n\n");
+    printf("                   - '<n>': Use n spaces for indentation (e.g. '2', '4', '8')\n");
+    printf("  -i <sort>       Specify indentation style (optional)\n");
+    printf("                   - 'asc': Sort in ascending\n");
+    printf("                   - 'desc': Sort in descending\n");
 }
 
 /* Program entry point | 程序入口点 */

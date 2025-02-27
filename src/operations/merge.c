@@ -121,6 +121,25 @@ static void get_final_output_path(const ProgramOptions *opts, char *final_path, 
     }
 }
 
+/* Remove the first comment node of the document | 移除文档的第一个注释节点 */
+static void remove_first_comment(xmlDocPtr doc) {
+    /* Get the first child node of the document | 获取文档的第一个子节点 */
+    xmlNodePtr node = doc->children;
+    while (node != NULL) {
+        /* Check if the node is a comment node | 检查是否为注释节点 */
+        if (node->type == XML_COMMENT_NODE) {
+            /* Remove the node from the document | 从文档中移除节点 */
+            xmlUnlinkNode(node);
+            /* Free the node memory | 释放节点内存 */
+            xmlFreeNode(node);
+            /* Exit loop after removing the first comment | 只删除第一个注释，找到后退出循环 */
+            break;
+        }
+        /* Move to the next node | 继续检查下一个节点 */
+        node = node->next;
+    }
+}
+
 /* Merge ARXML files implementation | ARXML文件合并实现 */
 int merge_arxml_files(const ProgramOptions *opts) {
     xmlDocPtr base_doc = NULL;
@@ -138,6 +157,9 @@ int merge_arxml_files(const ProgramOptions *opts) {
         printf("Error: Cannot parse base file '%s'\n", opts->input_files[0]);
         return 0;
     }
+
+    /* Remove the first comment node of the document | 移除文档的第一个注释节点 */
+    remove_first_comment(base_doc);
     
     /* Get root node | 获取根节点 */
     root_node = xmlDocGetRootElement(base_doc);
@@ -201,6 +223,17 @@ int merge_arxml_files(const ProgramOptions *opts) {
         printf("Error: Cannot create output directory for file '%s'\n", final_output_path);
         xmlFreeDoc(base_doc);
         return 0;
+    }
+
+    /* Sort nodes if requested | 如果需要则进行排序 */
+    if (opts->sort_order != SORT_NONE) {
+        xmlNodePtr root = xmlDocGetRootElement(base_doc);
+        if (!root) {
+            printf("Error: Empty document\n");
+            xmlFreeDoc(base_doc);
+            return 0;
+        }
+        sort_nodes_by_short_name(root, opts->sort_order);
     }
 
     /* Save the merged document | 保存合并后的文档 */
