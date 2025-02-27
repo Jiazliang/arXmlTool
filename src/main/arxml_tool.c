@@ -37,7 +37,7 @@ void print_usage(void) {
     printf("                   - If not specified: Keep source file indentation\n");
     printf("                   - 'tab': Use tab for indentation\n");
     printf("                   - '<n>': Use n spaces for indentation (e.g. '2', '4', '8')\n");
-    printf("  -i <sort>       Specify indentation style (optional)\n");
+    printf("  -s <sort>       Specify indentation style (optional)\n");
     printf("                   - 'asc': Sort in ascending\n");
     printf("                   - 'desc': Sort in descending\n\n");
     printf("Format mode options:\n");
@@ -47,7 +47,7 @@ void print_usage(void) {
     printf("                   - If not specified: Keep source file indentation\n");
     printf("                   - 'tab': Use tab for indentation\n");
     printf("                   - '<n>': Use n spaces for indentation (e.g. '2', '4', '8')\n");
-    printf("  -i <sort>       Specify indentation style (optional)\n");
+    printf("  -s <sort>       Specify indentation style (optional)\n");
     printf("                   - 'asc': Sort in ascending\n");
     printf("                   - 'desc': Sort in descending\n");
 }
