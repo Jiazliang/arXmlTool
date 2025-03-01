@@ -23,11 +23,12 @@ void print_usage(void) {
     printf("Usage:\n");
     printf("  arXmlTool.exe <mode> [options]\n");
     printf("  arXmlTool.exe <mode> -f <command_file>\n");
+    printf("  arXmlTool.exe --version\n");
     printf("  arXmlTool.exe --help\n\n");
     printf("Modes:\n");
     printf("  merge    - Merge multiple ARXML files\n");
-    printf("  compare  - Compare ARXML files\n");
-    printf("  generate - Generate ARXML file\n");
+    printf("  compare  - Compare ARXML files (Not implemented yet)\n");
+    printf("  generate - Generate ARXML file (Not implemented yet)\n");
     printf("  format   - Format ARXML files\n\n");
     printf("Merge mode options:\n");
     printf("  -a <file.arxml>  Specify input file (can be used multiple times)\n");

@@ -39,6 +39,9 @@ int parse_options(int argc, char *argv[], ProgramOptions *opts) {
     } else if (strcmp(argv[1], "--help") == 0) {
         print_usage();
         return 0;
+    } else if (strcmp(argv[1], "--version") == 0) {
+        printf("arXmlTool version %s\n", ARXML_TOOL_VERSION);
+        return 0;
     } else {
         printf("Error: Unknown operation mode '%s'\n", argv[1]);
         return 0;

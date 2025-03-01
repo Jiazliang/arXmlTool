@@ -1,6 +1,9 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+/* 在文件开头添加版本信息常量 */
+#define ARXML_TOOL_VERSION "1.1.0"
+
 #define MAX_PATH 256
 #define MAX_FILES 1024
 
