@@ -37,6 +37,8 @@ typedef struct {
     IndentStyle indent_style;
     int indent_width;        /* Number of spaces for indentation | 缩进的空格数 */
     SortOrder sort_order;
+    char target_tag[256];    /* Target tag name for sorting | 要排序的目标标签名 */
+    int sort_specific_tag;   /* Whether to sort specific tag only | 是否只对特定标签排序 */
 } ProgramOptions;
 
-#endif /* COMMON_H */ 
+#endif /* COMMON_H */

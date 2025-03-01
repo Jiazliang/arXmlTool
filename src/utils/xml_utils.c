@@ -244,3 +244,28 @@ DetectedIndentStyle detect_indent_style(const char* filename) {
     fclose(file);
     return style;
 } 
+
+/* Sort children of specific tag by SHORT-NAME | 对特定标签的子节点按SHORT-NAME排序 */
+int sort_specific_tag_children(xmlNodePtr root, const char* tag_name, SortOrder order) {
+    if (!root || !tag_name) return 0;
+    int count = 0;
+
+    /* 递归处理所有节点 */
+    xmlNodePtr node = root;
+    while (node) {
+        if (node->type == XML_ELEMENT_NODE) {
+            /* 如果找到匹配的标签，处理其子节点并增加计数 */
+            if (xmlStrcmp(node->name, (const xmlChar*)tag_name) == 0) {
+                if (node->children) {
+                    sort_sibling_nodes(node->children, order);
+                }
+                count++;
+            }
+            /* 递归处理子节点 */
+            count += sort_specific_tag_children(node->children, tag_name, order);
+        }
+        node = node->next;
+    }
+
+    return count;
+}

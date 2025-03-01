@@ -36,15 +36,16 @@ INCLUDE_DIRS="-Isrc/main -Isrc/command -Isrc/operations -Isrc/utils"
 
 # 检测操作系统
 if [ "$OS" = "Windows_NT" ]; then
-    # Windows 环境（假设使用 MinGW）
-    XML2_PATH="C:/msys64/mingw64"
+    # 强制优先使用当前目录的 mingw64/bin/gcc
+    export PATH="$PWD/mingw64/bin:$PATH"
     
     # Windows 下的编译命令（静态链接）
     gcc -Wall -Wextra \
         $INCLUDE_DIRS \
-        -I"$XML2_PATH/include/libxml2" \
+        -I"mingw64/include" \
+        -I"mingw64/include/libxml2" \
         -o build/arXmlTool.exe $SRC_FILES \
-        -L"$XML2_PATH/lib" \
+        -L"mingw64/lib" \
         -static \
         -lxml2 -lz -llzma -liconv -lws2_32 \
         -DLIBXML_STATIC
@@ -62,7 +63,7 @@ if [ $? -eq 0 ]; then
 else
     echo "编译失败！"
     exit 1
-fi 
+fi
 
 # Test counters
 TOTAL_TESTS=0
@@ -95,6 +96,16 @@ echo "Command: ./build/arXmlTool.exe merge -a testbench/cases/1.4/noconflict1.ar
 ./build/arXmlTool.exe merge -a testbench/cases/1.4/noconflict1.arxml -a testbench/cases/1.4/noconflict2.arxml -a testbench/cases/1.4/noconflict3.arxml -m testbench/results/1.4/merged_noconflict.arxml
 echo ""
 
+echo "Test Case 1.5: Merge Non-conflicting Containers with Tag Sorting (Ascending) "
+echo "Command: ./build/arXmlTool.exe merge -a testbench/cases/1.5/noconflict1.arxml -a testbench/cases/1.5/noconflict2.arxml -a testbench/cases/1.5/noconflict3.arxml -s asc -t AR-PACKAGES -m testbench/results/1.5/merged_noconflict.arxml"
+./build/arXmlTool.exe merge -a testbench/cases/1.5/noconflict1.arxml -a testbench/cases/1.5/noconflict2.arxml -a testbench/cases/1.5/noconflict3.arxml -s asc -t AR-PACKAGES -m testbench/results/1.5/merged_noconflict.arxml
+echo ""
+
+echo "Test Case 1.6: Merge Non-conflicting Containers with Tag Sorting (Descending) "
+echo "Command: ./build/arXmlTool.exe merge -a testbench/cases/1.6/noconflict1.arxml -a testbench/cases/1.6/noconflict2.arxml -a testbench/cases/1.6/noconflict3.arxml -s desc -t AR-PACKAGES -m testbench/results/1.6/merged_noconflict.arxml"
+./build/arXmlTool.exe merge -a testbench/cases/1.6/noconflict1.arxml -a testbench/cases/1.6/noconflict2.arxml -a testbench/cases/1.6/noconflict3.arxml -s desc -t AR-PACKAGES -m testbench/results/1.6/merged_noconflict.arxml
+echo ""
+
 
 echo "-------------------"
 echo "Test Case 2: Command File Tests"
@@ -108,6 +119,11 @@ echo ""
 echo "Test Case 2.2: Command File With Multiple Lines Input"
 echo "Command: ./build/arXmlTool.exe merge -f testbench/cases/2.2/command.txt"
 ./build/arXmlTool.exe merge -f testbench/cases/2.2/command.txt
+echo ""
+
+echo "Test Case 2.3: Command File With Multiple Lines Input in Ascending Order with Tag"
+echo "Command: ./build/arXmlTool.exe merge -f testbench/cases/2.3/command.txt"
+./build/arXmlTool.exe merge -f testbench/cases/2.3/command.txt
 echo ""
 
 
@@ -170,6 +186,11 @@ echo ""
 echo "Test Case 4.7: Format with any Indentation"
 echo "Command: ./build/arXmlTool.exe format -a testbench/cases/4.7/format_test.arxml -i 8 -o testbench/results/4.7" 
 ./build/arXmlTool.exe format -a testbench/cases/4.7/format_test.arxml -i 8 -o testbench/results/4.7
+echo ""
+
+echo "Test Case 4.8: Format with any Indentation in Acending Order with Tag"
+echo "Command: ./build/arXmlTool.exe format -a testbench/cases/4.8/format_test.arxml -i 2 -s asc -t AR-PACKAGES -o testbench/results/4.8" 
+./build/arXmlTool.exe format -a testbench/cases/4.8/format_test.arxml -i 2 -s asc -t AR-PACKAGES -o testbench/results/4.8
 echo ""
 
 echo "-------------------"

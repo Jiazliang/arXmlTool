@@ -17,19 +17,16 @@ extern int optind;  /* 声明 optind */
 
 /* Parse command line options | 解析命令行选项 */
 int parse_options(int argc, char *argv[], ProgramOptions *opts) {
-    /* Reset getopt | 重置getopt */
-    optind = 1;
-    
-    if (argc < 2) {
-        printf("Error: No operation mode specified\n");
-        return 0;
-    }
-
-    /* Initialize options | 初始化选项 */
+    /* Initialize basic options | 初始化基本选项 */
     memset(opts, 0, sizeof(ProgramOptions));
     opts->mode = MODE_UNKNOWN;
     opts->indent_style = INDENT_DEFAULT;
+    opts->indent_width = 4;
     opts->sort_order = SORT_NONE;
+    /* Initialize new options | 初始化新选项 */
+    opts->sort_specific_tag = 0;
+    memset(opts->target_tag, 0, sizeof(opts->target_tag));
+    
     strncpy(opts->output_dir, ".", MAX_PATH - 1);
 
     /* Parse operation mode | 解析操作模式 */
@@ -48,7 +45,7 @@ int parse_options(int argc, char *argv[], ProgramOptions *opts) {
     }
 }
 
-/* Parse merge mode options | 解析合并模式的选项 */
+/* Parse merge operation options | 解析合并操作的选项 */
 int parse_merge_options(int argc, char *argv[], ProgramOptions *opts) {
     int opt;
     opts->input_file_count = 0;
@@ -56,7 +53,7 @@ int parse_merge_options(int argc, char *argv[], ProgramOptions *opts) {
     /* Reset getopt | 重置getopt */
     optind = 1;
     
-    while ((opt = getopt(argc, argv, "a:m:o:i:s:")) != -1) {
+    while ((opt = getopt(argc, argv, "a:m:o:i:s:t:")) != -1) {
         switch (opt) {
             case 'a':
                 if (opts->input_file_count >= MAX_FILES) {
@@ -97,12 +94,25 @@ int parse_merge_options(int argc, char *argv[], ProgramOptions *opts) {
                     return 0;
                 }
                 break;
+            /* Handle tag specification option | 处理标签指定选项 */
+            case 't':
+                opts->sort_specific_tag = 1;
+                strncpy(opts->target_tag, optarg, sizeof(opts->target_tag) - 1);
+                opts->target_tag[sizeof(opts->target_tag) - 1] = '\0';
+                break;
+                
             case '?':
                 printf("Error: Invalid option or missing argument\n");
                 return 0;
         }
     }
-
+    
+    /* Validate options | 验证选项 */
+    if (opts->sort_specific_tag && opts->sort_order == SORT_NONE) {
+        printf("Error: Tag specified but no sort order given (-s option)\n");
+        return 0;
+    }
+    
     if (opts->input_file_count == 0 || opts->output_file[0] == '\0') {
         printf("Error: Merge mode requires at least one input file (-a) and one output file (-m)\n");
         return 0;
@@ -119,7 +129,7 @@ int parse_format_options(int argc, char *argv[], ProgramOptions *opts) {
     /* Reset getopt | 重置getopt */
     optind = 1;
     
-    while ((opt = getopt(argc, argv, "a:o:i:s:")) != -1) {
+    while ((opt = getopt(argc, argv, "a:o:i:s:t:")) != -1) {
         switch (opt) {
             case 'a':
                 if (opts->input_file_count >= MAX_FILES) {
@@ -157,10 +167,23 @@ int parse_format_options(int argc, char *argv[], ProgramOptions *opts) {
                     return 0;
                 }
                 break;
+            /* Handle tag specification option | 处理标签指定选项 */
+            case 't':
+                opts->sort_specific_tag = 1;
+                strncpy(opts->target_tag, optarg, sizeof(opts->target_tag) - 1);
+                opts->target_tag[sizeof(opts->target_tag) - 1] = '\0';
+                break;
+
             case '?':
                 printf("Error: Invalid option or missing argument\n");
                 return 0;
         }
+    }
+
+    /* Validate options | 验证选项 */
+    if (opts->sort_specific_tag && opts->sort_order == SORT_NONE) {
+        printf("Error: Tag specified but no sort order given (-s option)\n");
+        return 0;
     }
 
     if (opts->input_file_count == 0) {
@@ -169,4 +192,4 @@ int parse_format_options(int argc, char *argv[], ProgramOptions *opts) {
     }
 
     return 1;
-} 
+}

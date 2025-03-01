@@ -37,9 +37,12 @@ void print_usage(void) {
     printf("                   - If not specified: Keep source file indentation\n");
     printf("                   - 'tab': Use tab for indentation\n");
     printf("                   - '<n>': Use n spaces for indentation (e.g. '2', '4', '8')\n");
-    printf("  -s <sort>       Specify indentation style (optional)\n");
+    printf("  -s <sort>       Specify sort order (optional)\n");
     printf("                   - 'asc': Sort in ascending\n");
-    printf("                   - 'desc': Sort in descending\n\n");
+    printf("                   - 'desc': Sort in descending\n");
+    printf("  -t <tag>        Specify tag name for sorting its children (optional)\n");
+    printf("                   - If not specified: Sort all nodes recursively\n");
+    printf("                   - If specified: Only sort children of specified tag\n\n");
     printf("Format mode options:\n");
     printf("  -a <file.arxml>  Specify input file (can be used multiple times)\n");
     printf("  -o <directory>   Specify output directory (optional, will overwrite source files if not specified)\n");
@@ -47,9 +50,12 @@ void print_usage(void) {
     printf("                   - If not specified: Keep source file indentation\n");
     printf("                   - 'tab': Use tab for indentation\n");
     printf("                   - '<n>': Use n spaces for indentation (e.g. '2', '4', '8')\n");
-    printf("  -s <sort>       Specify indentation style (optional)\n");
+    printf("  -s <sort>       Specify sort order (optional)\n");
     printf("                   - 'asc': Sort in ascending\n");
     printf("                   - 'desc': Sort in descending\n");
+    printf("  -t <tag>        Specify tag name for sorting its children (optional)\n");
+    printf("                   - If not specified: Sort all nodes recursively\n");
+    printf("                   - If specified: Only sort children of specified tag\n");
 }
 
 /* Program entry point | 程序入口点 */
@@ -119,4 +125,4 @@ int main(int argc, char *argv[]) {
     }
 
     return result;
-} 
+}

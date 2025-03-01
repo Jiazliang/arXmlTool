@@ -233,7 +233,17 @@ int merge_arxml_files(const ProgramOptions *opts) {
             xmlFreeDoc(base_doc);
             return 0;
         }
-        sort_nodes_by_short_name(root, opts->sort_order);
+
+        if (opts->sort_specific_tag) {
+            /* Sort children of specific tag | 对特定标签的子节点进行排序 */
+            int sorted_count = sort_specific_tag_children(root, opts->target_tag, opts->sort_order);
+            if (sorted_count == 0) {
+                printf("Warning: No matching tags found for '%s'\n", opts->target_tag);
+            }
+        } else {
+            /* Sort all nodes recursively | 递归排序所有节点 */
+            sort_nodes_by_short_name(root, opts->sort_order);
+        }
     }
 
     /* Save the merged document | 保存合并后的文档 */
@@ -249,4 +259,4 @@ int merge_arxml_files(const ProgramOptions *opts) {
         printf("Merge completed, output file: %s\n", final_output_path);
     }
     return 1;
-} 
+}

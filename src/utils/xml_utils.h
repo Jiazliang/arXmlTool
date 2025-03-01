@@ -25,4 +25,7 @@ void sort_nodes_by_short_name(xmlNodePtr parent, SortOrder order);
 /* Detect indentation style from XML file | 从XML文件中检测缩进风格 */
 DetectedIndentStyle detect_indent_style(const char* filename);
 
+/* Sort children of specific tag by SHORT-NAME | 对特定标签的子节点按SHORT-NAME排序 */
+int sort_specific_tag_children(xmlNodePtr root, const char* tag_name, SortOrder order);
+
 #endif /* XML_UTILS_H */ 
